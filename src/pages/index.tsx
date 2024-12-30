@@ -19,15 +19,23 @@ const geistMono = Geist_Mono({
 export default function Home() {
   const [result, setResult] = useState<AssistanceResponse>();
   const [error, setError] = useState(false);
-  const [question, setQuestion] = useState<Question>(questions[0]);
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (id: Question['id'], question: string, audioBlob: Blob | null) => {
+  const question = questions[questionIndex];
+
+  const handleSubmit = async (
+    id: Question["id"],
+    question: string,
+    audioBlob: Blob | null
+  ) => {
     if (!audioBlob) return;
 
     try {
+      setIsLoading(true);
       const formData = new FormData();
       formData.append("audio", audioBlob, "audio.wav");
-      formData.append("id", id)
+      formData.append("id", id);
       formData.append("question", question);
 
       const response = await fetch("/api/analysis", {
@@ -46,12 +54,14 @@ export default function Home() {
     } catch (error: any) {
       console.error("Error during audio analysis:", error.message);
       setError(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-
   const handleNext = () => {
     setResult(undefined);
+    setQuestionIndex((prev) => (prev + 1) % questions.length);
   };
 
   const handleTryAgain = () => {
@@ -60,26 +70,25 @@ export default function Home() {
 
   return (
     <div
-      className={`${geistSans.variable} ${geistMono.variable} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
+      className={`${geistSans.variable} ${geistMono.variable} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] bg-white text-black dark:bg-black dark:text-white`}
     >
       <DarkModeButton />
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        {
-          error && (
-            <div className="text-red-500 text-lg text-center">
-              An error occurred while analyzing the audio. Please try again.
-            </div>
-          )
-        }
-        {!error && (result ? (
-          <Step2
-            onNext={handleNext}
-            onTryAgain={handleTryAgain}
-            result={result}
-          />
-        ) : (
-          <Step1 question={question} onSubmit={handleSubmit} />
-        ))}
+        {error && (
+          <div className="text-red-500 text-lg text-center">
+            An error occurred while analyzing the audio. Please try again.
+          </div>
+        )}
+        {!error &&
+          (result ? (
+            <Step2
+              onNext={handleNext}
+              onTryAgain={handleTryAgain}
+              result={result}
+            />
+          ) : (
+            <Step1 question={question} onSubmit={handleSubmit} isLoading={isLoading} />
+          ))}
       </main>
     </div>
   );

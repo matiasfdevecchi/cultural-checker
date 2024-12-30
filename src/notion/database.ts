@@ -17,6 +17,7 @@ export const addFeedbackToNotion = async (data: AssistanceResponse): Promise<voi
         Pregunta: { title: [{ text: { content: data.question } }] },
         Respuesta: { rich_text: [{ text: { content: data.response } }] },
         Resultado: { select: { name: data.result } },
+        'Resultado Corregido': { select: { name: data.result } },
         'Green Flags': { rich_text: [{ text: { content: data.greenFlags.join(', ') } }] },
         'Red Flags': { rich_text: [{ text: { content: data.redFlags.join(', ') } }] },
       },
@@ -42,7 +43,7 @@ export const getStrongYesFeedback = async (questionId: Question['id']): Promise<
             },
           },
           {
-            property: 'Resultado',
+            property: 'Resultado Corregido',
             select: {
               equals: 'Strong yes',
             },
