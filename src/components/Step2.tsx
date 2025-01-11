@@ -1,7 +1,9 @@
 import React, { FC } from "react";
 import { Button } from "./ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { AssistanceResponse } from "@/client-assistance/core/domain/Action";
+import RatingBar from "./ui/ratingbar";
+import Link from "next/link";
+import { NAME } from "../../constants";
 
 const Step2: FC<{
   result: AssistanceResponse;
@@ -13,57 +15,86 @@ const Step2: FC<{
   onTryAgain,
 }) => {
     return (
-      <Card className="max-w-xl mx-auto p-6">
-        <CardHeader>
-          <CardTitle className="text-center text-2xl">Feedback</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-700 dark:text-gray-200 text-lg mb-6 text-center">
-            <span className="font-semibold">You responded:</span> <br />
-            <em>"{response}"</em>
-          </p>
-          <p
-            className={`${result.toLowerCase().includes("no")
-                ? "text-red-600 dark:text-red-400"
-                : "text-green-600 dark:text-green-400"
-              } text-xl font-bold text-center mb-6`}
-          >
-            Your response is: <strong>{result}</strong>
-          </p>
-          <div className="border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 p-6">
-            {greenFlags.length > 0 && (
-              <>
-                <h3 className="text-green-600 dark:text-green-400 font-bold mt-6 mb-3">Green Flags</h3>
-                <ul className="list-disc pl-6 text-gray-600 dark:text-gray-200 space-y-2">
-                  {greenFlags.map((flag, i) => (
-                    <li key={i}>{flag}</li>
-                  ))}
-                </ul>
-              </>
-            )}
-            {redFlags.length > 0 && (
-              <>
-                <h3 className="text-red-600 dark:text-red-400 font-bold mb-3">Red Flags</h3>
-                <ul className="list-disc pl-6 text-gray-600 dark:text-gray-200 space-y-2">
-                  {redFlags.map((flag, i) => (
-                    <li key={i}>{flag}</li>
-                  ))}
-                </ul>
-              </>
-            )}
+      <>
+        <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center lg:space-x-20 space-y-6 lg:space-y-0 px-[5%] lg:px-[10%] mt-20">
+          <div className="flex flex-col justify-center items-center w-full lg:w-1/2 space-y-4">
+            <p className="text-gray-700 dark:text-gray-200 text-xl text-lg text-center mb-2 font-bold">
+              {question}
+            </p>
+            <p className="text-gray-700 dark:text-gray-200 text-lg text-center">
+              <em>"{response}"</em>
+            </p>
           </div>
-          <Button className="mt-6 w-full bg-indigo-800 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-400 text-white" onClick={onNext}>
-            Next
-          </Button>
-          <Button
-            className="mt-4 w-full dark:bg-gray-600 dark:hover:bg-gray-500"
-            variant="secondary"
-            onClick={onTryAgain}
-          >
-            Try Again
-          </Button>
-        </CardContent>
-      </Card>
+
+          <div className="w-full lg:w-1/2 flex flex-col justify-center items-center pt-5 lg:pt-0">
+            <RatingBar active={result} />
+            <div className="w-full border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 p-6">
+              {greenFlags.length > 0 && (
+                <>
+                  <h3 className="text-green-600 font-bold mt-6 mb-3">Green Flags</h3>
+                  <ul className="list-disc pl-6 text-gray-600 dark:text-gray-200 space-y-2">
+                    {greenFlags.map((flag, i) => (
+                      <li key={i}>{flag}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+              {redFlags.length > 0 && (
+                <>
+                  <h3 className={`text-red-600 font-bold mb-3 ${greenFlags.length > 0 && 'mt-5'}`}>Red Flags</h3>
+                  <ul className="list-disc pl-6 text-gray-600 dark:text-gray-200 space-y-2">
+                    {redFlags.map((flag, i) => (
+                      <li key={i}>{flag}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
+            <Button
+              className="mt-6 w-full bg-indigo-800 hover:bg-indigo-600 text-white"
+              onClick={onNext}
+            >
+              Next
+            </Button>
+            <Button
+              className="mt-4 w-full dark:bg-gray-600 dark:hover:bg-gray-500"
+              variant="secondary"
+              onClick={onTryAgain}
+            >
+              Try Again
+            </Button>
+          </div>
+        </div>
+        <div className="mt-6 mb-20 animate-fly-in container mx-auto px-4 grid lg:grid-cols-2 gap-6">
+          {/* divider */}
+          <div className="w-full h-0.5 bg-gray-300 dark:bg-gray-400 lg:col-span-2"></div>
+          <h2 className="w-full my-2 text-xl text-center lg:col-span-2">
+            {NAME} es de{" "}
+            <Link
+              href="https://ready.silver.dev"
+              className="text-indigo-400 hover:text-indigo-300 cursor-pointer"
+            >
+              Interview Ready
+            </Link>
+          </h2>
+          <p className="mt-0 text-center lg:col-span-2">
+            Esta herramienta es parte de un programa integral de preparación de
+            entrevistas.
+            <br />
+            Podes ver el formato y más contenido en el video.
+          </p>
+          <iframe
+            className="rounded-lg shadow-lg mt-4 max-w-xs md:max-w-none mx-auto lg:col-span-2"
+            width="560"
+            height="315"
+            src="https://www.youtube.com/embed/D8ExwS6iPAI?si=aTDQHypNf1s0KHyM"
+            title="YouTube video player"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+          ></iframe>
+        </div>
+      </>
     );
   };
 

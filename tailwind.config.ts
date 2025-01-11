@@ -8,6 +8,11 @@ export default {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+	fontSize: {
+		lg: '1.125rem',
+		xl: '2rem',
+		xxl: '3rem',
+	},
   	extend: {
   		colors: {
   			background: 'hsl(var(--background))',

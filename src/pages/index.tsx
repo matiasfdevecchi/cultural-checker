@@ -1,20 +1,9 @@
-import { Geist, Geist_Mono } from "next/font/google";
 import Step1 from "@/components/Step1";
 import { useState } from "react";
 import Step2 from "@/components/Step2";
 import { AssistanceResponse } from "@/client-assistance/core/domain/Action";
 import { Question, questions } from "@/data/questions";
-import DarkModeButton from "@/components/DarkModeButton";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import Notification from "@/components/Notification";
 
 export default function Home() {
   const [result, setResult] = useState<AssistanceResponse>();
@@ -32,6 +21,7 @@ export default function Home() {
     if (!audioBlob) return;
 
     try {
+      setError(false);
       setIsLoading(true);
       const formData = new FormData();
       formData.append("audio", audioBlob, "audio.wav");
@@ -49,6 +39,8 @@ export default function Home() {
       }
 
       const data = await response.json();
+
+      console.log(data);
 
       setResult(data);
     } catch (error: any) {
@@ -68,27 +60,30 @@ export default function Home() {
     setResult(undefined);
   };
 
+  const handleSelectQuestion = (id: Question['id']) => {
+    const question = questions.find((q) => q.id === id);
+    if (!question) return;
+
+    setQuestionIndex(questions.indexOf(question));
+  }
+
   return (
     <div
-      className={`${geistSans.variable} ${geistMono.variable} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] bg-white text-black dark:bg-black dark:text-white`}
+      className={`items-center justify-items-center`}
     >
-      <DarkModeButton />
+      {error && <Notification message="Ha ocurrido un error, vuelve a intentarlo." type="error" onClose={() => setError(false)} />}
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        {error && (
-          <div className="text-red-500 text-lg text-center">
-            An error occurred while analyzing the audio. Please try again.
-          </div>
-        )}
-        {!error &&
-          (result ? (
+        {
+          result ? (
             <Step2
               onNext={handleNext}
               onTryAgain={handleTryAgain}
               result={result}
             />
           ) : (
-            <Step1 question={question} onSubmit={handleSubmit} isLoading={isLoading} />
-          ))}
+            <Step1 question={question} onSelectQuestion={handleSelectQuestion} onSubmit={handleSubmit} isLoading={isLoading} />
+          )
+        }
       </main>
     </div>
   );

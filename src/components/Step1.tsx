@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
 import { Question } from "@/data/questions";
 import Select from "react-select";
 import { companyOptions, roleOptions } from "@/data/selects";
+import { NAME } from "../../constants";
+import ChangeQuestion from "./ChangeQuestion";
 
 const customClassNames = {
   control: (state: any) =>
@@ -41,10 +43,12 @@ const ThemedSelect = (props: any) => {
 
 const Step1: React.FC<{
   question: Question;
+  onSelectQuestion: (id: Question['id']) => void;
   onSubmit: (id: Question['id'], question: string, audioBlob: Blob | null) => void;
   isLoading: boolean;
 }> = ({
   question,
+  onSelectQuestion,
   onSubmit,
   isLoading,
 }) => {
@@ -76,6 +80,8 @@ const Step1: React.FC<{
     const audioURLRef = useRef<string | null>(null);
     const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
     const reproducingTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
+
+    const invalidLength = recorded && (counter < question.minTime || counter > question.maxTime);
 
     useEffect(() => {
       let timer: NodeJS.Timeout | undefined;
@@ -159,6 +165,7 @@ const Step1: React.FC<{
       setAudioBlob(null);
       setRecorded(false);
       setReproduced(0);
+      setCounter(0);
       audioURLRef.current = null;
     };
 
@@ -169,133 +176,152 @@ const Step1: React.FC<{
     }, [audioBlob]);
 
     return (
-      <Card className="max-w-lg mx-auto">
-        <CardHeader>
-          <CardTitle className="text-center">Silver.dev&apos;s BEHAVE</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-700 dark:text-gray-200 text-lg mb-4">
+      <>
+        <div className="mx-auto max-w-[800px] mt-10">
+          <p className="font-bold text-xxl text-center mb-4">{NAME}</p>
+          <p className="text-gray-700 dark:text-gray-200 text-lg mb-4 text-center leading-7">
             Get instant feedback from answering classical behavioral questions
-            with Silver.dev&apos;s themed auto-response. Great for practicing
-            English & Storytelling.
+            with Silver.dev&apos;s themed auto-response. Great for practicing English & Storytelling.
           </p>
-          <p className="text-gray-700 dark:text-gray-200 text-lg mb-2 font-bold">
-            Question: "{question.text}"
-          </p>
-          {
-            question.tags?.includes("company") && (
-              <>
-                <label className="block text-gray-700 dark:text-gray-200 text-lg mb-2">
-                  Company
-                </label>
-                <ThemedSelect
-                  options={companyOptions}
-                  value={company}
-                  onChange={(value: { value: string; label: string }) => setCompany(value)}
-                  className="mb-2"
-                />
-              </>
-            )
-          }
-          {
-            question.tags?.includes("role") && (
-              <>
-                <label className="block text-gray-700 dark:text-gray-200 text-lg mb-2">
-                  Role
-                </label>
-                <ThemedSelect
-                  options={roleOptions}
-                  value={role}
-                  onChange={(value: { value: string; label: string }) => setRole(value)}
-                  className="mb-2"
-                />
-              </>
-            )
-          }
-          <div className="flex items-center justify-between w-full p-4 border rounded-lg mt-6 border-gray-300 dark:border-gray-300">
+        </div>
+        <Card className="max-w-[700px] w-full mx-auto mb-20">
+          <CardContent>
             <div className="flex items-center">
-              <div className="w-[36px] h-[36px] flex justify-center items-center">
-                {!isActive && recorded ? (
-                  <div
-                    className="w-[36px] h-[36px] bg-indigo-800 dark:bg-indigo-500 rounded-full flex items-center justify-center cursor-pointer"
-                    onClick={reproducing ? handleStop : handlePlay}
-                  >
-                    {reproducing ? (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="white"
-                        viewBox="0 0 24 24"
-                        className="w-6 h-6"
-                      >
-                        <rect x="6" y="6" width="12" height="12" rx="2" />
-                      </svg>
-                    ) : (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="white"
-                        viewBox="-1 0 24 24"
-                        className="w-6 h-6"
-                      >
-                        <path d="M5.25 5.25l13.5 6.75-13.5 6.75V5.25z" />
-                      </svg>
-                    )}
-                  </div>
-                ) : (
-                  <motion.div
-                    className="bg-red-500"
-                    onClick={() => {
-                      isActive ? stopRecording() : startRecording();
-                    }}
-                    initial={false}
-                    animate={{
-                      borderRadius: isActive ? "6px" : "50%",
-                      width: isActive ? "24px" : "36px",
-                      height: isActive ? "24px" : "36px",
-                    }}
-                    transition={{
-                      duration: 0.2,
-                      ease: "easeInOut",
-                    }}
-                    style={{
-                      cursor: "pointer",
-                    }}
-                  />
-                )}
-              </div>
-              <span className="text-lg font-bold text-gray-800 dark:text-gray-200 ml-4">
-                {recorded ? `${formatTime(reproduced)}/` : ""}
-                {formatTime(counter)}
-              </span>
+              <p className="w-full text-gray-700 dark:text-gray-200 text-xl text-lg text-center mb-2 font-bold">
+                {question.text}
+              </p>
+              <ChangeQuestion selected={question.id} onSelect={onSelectQuestion} />
             </div>
-            {recorded && (
-              <Button variant="destructive" onClick={deleteRecording}>
-                Delete
-              </Button>
-            )}
-          </div>
-          <Button
-            className="mt-8 w-full bg-indigo-800 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-400 text-white"
-            onClick={() => {
-              if (isLoading) return;
-              if (reproducing) {
-                handleStop();
+            {
+              question.tags?.includes("company") && (
+                <>
+                  <label className="block text-gray-700 dark:text-gray-200 text-lg mb-2">
+                    Company
+                  </label>
+                  <ThemedSelect
+                    options={companyOptions}
+                    value={company}
+                    onChange={(value: { value: string; label: string }) => setCompany(value)}
+                    className="mb-2"
+                  />
+                </>
+              )
+            }
+            {
+              question.tags?.includes("role") && (
+                <>
+                  <label className="block text-gray-700 dark:text-gray-200 text-lg mb-2">
+                    Role
+                  </label>
+                  <ThemedSelect
+                    options={roleOptions}
+                    value={role}
+                    onChange={(value: { value: string; label: string }) => setRole(value)}
+                    className="mb-2"
+                  />
+                </>
+              )
+            }
+            <div className={`flex items-center justify-between w-full p-4 border rounded-lg mt-6 ${invalidLength ? 'border-red-600' : 'border-gray-300 dark:border-gray-300'}`}>
+              <div className="flex items-center">
+                <div className="w-[36px] h-[36px] flex justify-center items-center">
+                  {!isActive && recorded ? (
+                    <div
+                      className="w-[36px] h-[36px] bg-indigo-800 dark:bg-indigo-500 rounded-full flex items-center justify-center cursor-pointer"
+                      onClick={reproducing ? handleStop : handlePlay}
+                    >
+                      {reproducing ? (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="white"
+                          viewBox="0 0 24 24"
+                          className="w-6 h-6"
+                        >
+                          <rect x="6" y="6" width="12" height="12" rx="2" />
+                        </svg>
+                      ) : (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="white"
+                          viewBox="-1 0 24 24"
+                          className="w-6 h-6"
+                        >
+                          <path d="M5.25 5.25l13.5 6.75-13.5 6.75V5.25z" />
+                        </svg>
+                      )}
+                    </div>
+                  ) : (
+                    <motion.div
+                      className="bg-red-500"
+                      onClick={() => {
+                        isActive ? stopRecording() : startRecording();
+                      }}
+                      initial={false}
+                      animate={{
+                        borderRadius: isActive ? "6px" : "50%",
+                        width: isActive ? "24px" : "36px",
+                        height: isActive ? "24px" : "36px",
+                      }}
+                      transition={{
+                        duration: 0.2,
+                        ease: "easeInOut",
+                      }}
+                      style={{
+                        cursor: "pointer",
+                      }}
+                    />
+                  )}
+                </div>
+                <span className="text-lg font-bold text-gray-800 dark:text-gray-200 ml-4">
+                  {isActive && "Recording ("}
+                  {recorded ? `${formatTime(reproduced)}/` : ""}
+                  {formatTime(counter)}
+                  {isActive && ")"}
+                </span>
+              </div>
+              {recorded && (
+                <Button variant="destructive" onClick={deleteRecording}>
+                  Retry
+                </Button>
+              )}
+              {/* aclaracion de tiemppo de duracion */}
+              {
+                !recorded && <p className="text-gray-700 dark:text-gray-200 text-sm text-center">
+                  {question.minTime}s - {question.maxTime}s
+                </p>
               }
-              onSubmit(question.id, questionToText(), audioBlob);
-            }}
-            disabled={!recorded}
-          >
+            </div>
             {
-              !isLoading && "Submit"
+              invalidLength && (
+                <p className="text-red-500 text-sm text-center mt-2">
+                  The answer must be between {question.minTime}s and {question.maxTime}s
+                </p>
+              )
             }
-            {
-              isLoading && <svg aria-hidden="true" role="status" className="inline w-4 h-4 me-3 text-white dark:text-black animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB" />
-                <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor" />
-              </svg>
-            }
-          </Button>
-        </CardContent>
-      </Card>
+            <Button
+              className="mt-8 w-full bg-indigo-800 hover:bg-indigo-600 text-white"
+              onClick={() => {
+                if (isLoading) return;
+                if (reproducing) {
+                  handleStop();
+                }
+                onSubmit(question.id, questionToText(), audioBlob);
+              }}
+              disabled={!recorded || counter < question.minTime || counter > question.maxTime}
+            >
+              {
+                !isLoading && "Evaluate Answer"
+              }
+              {
+                isLoading && <svg aria-hidden="true" role="status" className="inline w-4 h-4 me-3 text-white dark:text-black animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB" />
+                  <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor" />
+                </svg>
+              }
+            </Button>
+          </CardContent>
+        </Card>
+      </>
     );
   };
 
