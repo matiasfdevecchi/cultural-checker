@@ -25,7 +25,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         <div className="container flex justify-between">
           <Link
             href="/"
-            className="text-xl flex gap-2 items-center text-nowrap col-span-3"
+            className="text-lgr flex gap-2 items-center text-nowrap col-span-3"
           >
             <Image
               className="invert dark:invert-0"
