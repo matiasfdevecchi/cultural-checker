@@ -1,4 +1,4 @@
-import { AssistanceResponse } from "@/client-assistance/core/domain/Action";
+import { AssistanceResponse, Result } from "@/client-assistance/core/domain/Action";
 import { Question } from "@/data/questions";
 import { Client } from "@notionhq/client";
 import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
@@ -68,6 +68,72 @@ export const getStrongYesFeedback = async (questionId: Question['id']): Promise<
       }
       return "No response found";
     });
+  } catch (error: any) {
+    console.error("Error al obtener respuestas:", error.message);
+    throw new Error("Failed to fetch feedback from Notion");
+  }
+};
+
+export const getLastFeedback = async (questionId: Question['id'], result: Result): Promise<AssistanceResponse | null> => {
+  try {
+    const response = await notion.databases.query({
+      database_id: DATABASE_ID,
+      filter: {
+        and: [
+          {
+            property: 'Id',
+            rich_text: {
+              equals: questionId,
+            },
+          },
+          {
+            property: 'Resultado Corregido',
+            select: {
+              equals: result,
+            },
+          },
+        ],
+      },
+      sorts: [
+        {
+          property: 'Fecha',
+          direction: 'descending',
+        },
+      ],
+      page_size: 1,
+    });
+
+    if (response.results.length === 0) return null;
+
+    const page = response.results[0] as PageObjectResponse;
+    const properties = page.properties;
+    
+    if (
+      properties.Id.type !== 'rich_text' ||
+      properties.Pregunta.type !== 'title' ||
+      properties.Respuesta.type !== 'rich_text' ||
+      properties.Resultado.type !== 'select' ||
+      properties.Resultado.select === null ||
+      properties['Green Flags'].type !== 'rich_text' ||
+      properties['Red Flags'].type !== 'rich_text'
+    ) {
+      console.error("Propiedades de Notion con formato incorrecto");
+      return null;
+    }
+
+    const greenFlagsText = properties['Green Flags'].rich_text[0].plain_text.trim();
+    const redFlagsText = properties['Red Flags'].rich_text[0].plain_text.trim();
+    const greenFlags = greenFlagsText ? greenFlagsText.split(', ') : [];
+    const redFlags = redFlagsText ? redFlagsText.split(', ') : [];
+    
+    return {
+      questionId: properties.Id.rich_text[0].plain_text,
+      question: properties.Pregunta.title[0].plain_text,
+      response: properties.Respuesta.rich_text[0].plain_text,
+      result: properties.Resultado.select.name as Result,
+      greenFlags,
+      redFlags,
+    };
   } catch (error: any) {
     console.error("Error al obtener respuestas:", error.message);
     throw new Error("Failed to fetch feedback from Notion");

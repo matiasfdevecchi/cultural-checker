@@ -16,23 +16,25 @@ const Step2: FC<{
 }) => {
     return (
       <>
-        <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center lg:space-x-20 space-y-6 lg:space-y-0 px-[5%] lg:px-[10%] mt-20">
-          <div className="flex flex-col justify-center items-center w-full lg:w-1/2 space-y-4">
-            <p className="text-gray-700 dark:text-gray-200 text-xl text-lg text-center mb-2 font-bold">
+        <div className="w-full flex flex-col lg:flex-row-reverse items-center lg:items-start justify-center lg:space-x-reverse lg:space-x-20 space-y-6 lg:space-y-0 px-[5%] lg:px-[10%] my-20">
+          <div className="flex flex-col justify-center items-center w-full lg:w-1/2 space-y-6">
+            <p className="text-gray-800 dark:text-gray-100 text-xl font-semibold text-center mb-2 leading-relaxed">
               {question}
             </p>
-            <p className="text-gray-700 dark:text-gray-200 text-lg text-center">
-              <em>"{response}"</em>
-            </p>
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 w-full">
+              <p className="text-gray-700 dark:text-gray-200 text-lg text-center italic">
+                "{response}"
+              </p>
+            </div>
           </div>
 
           <div className="w-full lg:w-1/2 flex flex-col justify-center items-center pt-5 lg:pt-0">
             <RatingBar active={result} />
-            <div className="w-full border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 p-6">
+            <div className="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 p-8 shadow-lg">
               {greenFlags.length > 0 && (
                 <>
-                  <h3 className="text-green-600 font-bold mt-6 mb-3">Green Flags</h3>
-                  <ul className="list-disc pl-6 text-gray-600 dark:text-gray-200 space-y-2">
+                  <h3 className="text-green-600 font-bold text-lg mt-6 mb-3">Green Flags</h3>
+                  <ul className="list-disc pl-6 text-gray-700 dark:text-gray-200 space-y-3">
                     {greenFlags.map((flag, i) => (
                       <li key={i}>{flag}</li>
                     ))}
@@ -41,8 +43,8 @@ const Step2: FC<{
               )}
               {redFlags.length > 0 && (
                 <>
-                  <h3 className={`text-red-600 font-bold mb-3 ${greenFlags.length > 0 && 'mt-5'}`}>Red Flags</h3>
-                  <ul className="list-disc pl-6 text-gray-600 dark:text-gray-200 space-y-2">
+                  <h3 className={`text-red-600 font-bold text-lg mb-3 ${greenFlags.length > 0 && 'mt-6'}`}>Red Flags</h3>
+                  <ul className="list-disc pl-6 text-gray-700 dark:text-gray-200 space-y-3">
                     {redFlags.map((flag, i) => (
                       <li key={i}>{flag}</li>
                     ))}
@@ -50,19 +52,20 @@ const Step2: FC<{
                 </>
               )}
             </div>
-            <Button
-              className="mt-6 w-full bg-indigo-800 hover:bg-indigo-600 text-white"
-              onClick={onNext}
-            >
-              Next
-            </Button>
-            <Button
-              className="mt-4 w-full dark:bg-gray-600 dark:hover:bg-gray-500"
-              variant="secondary"
-              onClick={onTryAgain}
-            >
-              Try Again
-            </Button>
+            <div className="w-full flex mt-8">
+              <Button
+                className="flex-1 bg-indigo-800 hover:bg-indigo-600 text-white rounded-r-none border-r border-indigo-700 py-3 text-lg"
+                onClick={onTryAgain}
+              >
+                Repeat question
+              </Button>
+              <Button
+                className="flex-1 bg-indigo-800 hover:bg-indigo-600 text-white rounded-l-none py-3 text-lg"
+                onClick={onNext}
+              >
+                New question
+              </Button>
+            </div>
           </div>
         </div>
         <div className="mt-6 mb-20 animate-fly-in container mx-auto px-4 grid lg:grid-cols-2 gap-6">

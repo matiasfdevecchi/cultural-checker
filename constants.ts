@@ -1,2 +1,2 @@
 export const NAME = 'Cultural Checker';
-export const GITHUB_URL = 'https://github.com/conanbatt/resume-checker';
+export const GITHUB_URL = 'https://github.com/matiasfdevecchi/cultural-checker';
