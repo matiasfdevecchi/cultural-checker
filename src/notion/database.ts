@@ -20,6 +20,7 @@ export const addFeedbackToNotion = async (data: AssistanceResponse): Promise<voi
         'Resultado Corregido': { select: { name: data.result } },
         'Green Flags': { rich_text: [{ text: { content: data.greenFlags.join(', ') } }] },
         'Red Flags': { rich_text: [{ text: { content: data.redFlags.join(', ') } }] },
+        Longitud: { number: data.response.length },
       },
     });
 
@@ -90,6 +91,12 @@ export const getLastFeedback = async (questionId: Question['id'], result: Result
             property: 'Resultado Corregido',
             select: {
               equals: result,
+            },
+          },
+          {
+            property: 'Longitud',
+            number: {
+              greater_than_or_equal_to: 100,
             },
           },
         ],
