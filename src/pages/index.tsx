@@ -70,7 +70,7 @@ export default function Home() {
       }
 
       if (response.status === 204) {
-        setError(`No example available for this question with the result '${result}'`);
+        setError(`No example available for this question with the result '${result}'. Be the first to create one!`);
         setResult(undefined);
         return;
       }
