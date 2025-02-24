@@ -12,7 +12,7 @@ export const questions: Question[] = [
         text: 'Why are you interested in this position?',
         tags: ['company', 'role'],
         minTime: 30,
-        maxTime: 60,
+        maxTime: 5,
     },
     {
         id: 'about-yourself',

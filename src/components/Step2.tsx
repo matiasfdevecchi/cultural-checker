@@ -52,15 +52,15 @@ const Step2: FC<{
                 </>
               )}
             </div>
-            <div className="w-full flex mt-8">
+            <div className="w-full flex gap-4 mt-8">
               <Button
-                className="flex-1 bg-indigo-800 hover:bg-indigo-600 text-white rounded-r-none border-r border-indigo-700 py-3 text-lg"
+                className="flex-1 bg-pink-700 hover:bg-pink-600 text-white py-3 text-lg"
                 onClick={onTryAgain}
               >
                 Repeat question
               </Button>
               <Button
-                className="flex-1 bg-indigo-800 hover:bg-indigo-600 text-white rounded-l-none py-3 text-lg"
+                className="flex-1 bg-indigo-800 hover:bg-indigo-600 text-white py-3 text-lg"
                 onClick={onNext}
               >
                 New question
